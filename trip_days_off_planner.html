@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My September Trip — Days Off Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FBF7EE;
+    --card-bg: #FFFFFF;
+    --text: #2E2B26;
+    --muted: #6B6559;
+    --pto: #1E7A46;
+    --pto-bg: #E6F4EA;
+    --weekend: #1D5B99;
+    --weekend-bg: #E7F1FB;
+    --border: #E4DFD3;
+    --accent: #B5542A;
+    --remote: #6A4C93;
+    --remote-bg: #EFE8F5;
+    --status-green: #2E9E44;
+    --status-yellow: #E0A526;
+    --status-red: #D64545;
+    --wedding: #A8842E;
+    --wedding-bg: #FBF3DC;
+    --holiday: #2E8B8B;
+    --holiday-bg: #E3F3F3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:32px 20px 60px;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Lexend','Atkinson Hyperlegible',Verdana,Arial,sans-serif;
+    font-size:19px;
+    line-height:1.6;
+    letter-spacing:0.2px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{
+    font-size:30px;
+    font-weight:700;
+    margin:0 0 6px;
+    line-height:1.3;
+  }
+  .subtitle{
+    font-size:19px;
+    color:var(--muted);
+    margin:0 0 28px;
+  }
+  .summary{
+    background:var(--card-bg);
+    border:2px solid var(--border);
+    border-radius:16px;
+    padding:22px 24px;
+    margin-bottom:32px;
+  }
+  .summary h2{
+    font-size:20px;
+    margin:0 0 14px;
+    font-weight:600;
+  }
+  .summary-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 20px;
+  }
+  .stat{
+    background:var(--pto-bg);
+    border-radius:12px;
+    padding:12px 16px;
+  }
+  .stat .num{
+    font-size:24px;
+    font-weight:700;
+    color:var(--pto);
+    display:block;
+  }
+  .stat .label{
+    font-size:16px;
+    color:var(--text);
+  }
+  .note{
+    background:#FFF4E9;
+    border:2px solid #F1D9BE;
+    border-radius:14px;
+    padding:16px 20px;
+    margin-bottom:32px;
+    font-size:17px;
+  }
+  .note strong{color:var(--accent);}
+  .legend{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+    font-size:16px;
+  }
+  .legend-item{display:flex;align-items:center;gap:8px;}
+  .dot{width:16px;height:16px;border-radius:50%;display:inline-block;}
+  .dot.pto{background:var(--pto);}
+  .dot.weekend{background:var(--weekend);}
+  .day-card{
+    background:var(--card-bg);
+    border:2px solid var(--border);
+    border-left-width:10px;
+    border-radius:14px;
+    padding:16px 20px;
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .day-card.pto{border-left-color:var(--pto);}
+  .day-card.weekend{border-left-color:var(--weekend);}
+  .date-block{
+    min-width:90px;
+    text-align:center;
+  }
+  .date-block .day-num{
+    font-size:26px;
+    font-weight:700;
+    display:block;
+  }
+  .date-block .day-name{
+    font-size:15px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .day-info{flex:1;}
+  .location{
+    font-size:19px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .status-badge{
+    display:inline-block;
+    font-size:15px;
+    font-weight:600;
+    padding:4px 12px;
+    border-radius:999px;
+  }
+  .status-badge.pto{background:var(--pto-bg);color:var(--pto);}
+  .status-badge.weekend{background:var(--weekend-bg);color:var(--weekend);}
+  .status-badge.travel{background:#FFF4E9;color:var(--accent);}
+  .day-card.travel{border-left-color:var(--accent);}
+  .dot.travel{background:var(--accent);}
+  .cal-cell.travel{background:#FFF4E9;border-color:var(--accent);}
+  .status-badge.remote{background:var(--remote-bg);color:var(--remote);}
+  .day-card.remote{border-left-color:var(--remote);}
+  .dot.remote{background:var(--remote);}
+  .cal-cell.remote{background:var(--remote-bg);border-color:var(--remote);}
+  .status-badge.holiday{background:var(--holiday-bg);color:var(--holiday);}
+  .day-card.holiday{border-left-color:var(--holiday);}
+  .dot.holiday{background:var(--holiday);}
+  .cal-cell.holiday{background:var(--holiday-bg);border-color:var(--holiday);}
+  .cal-cell.tentative{border-style:dashed;border-color:var(--status-red);border-width:2px;}
+  .tentative-tag{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--status-red);
+    margin-top:6px;
+  }
+  .safety-tip{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px dashed var(--border);
+    font-size:14.5px;
+    color:var(--text);
+    line-height:1.45;
+  }
+  .safety-icon{
+    color:var(--accent);
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .route-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:20px;
+  }
+  .route-table th{
+    text-align:left;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    color:var(--muted);
+    padding:8px;
+    border-bottom:2px solid var(--border);
+  }
+  .route-table td{
+    padding:8px;
+    font-size:15px;
+    border-bottom:1px solid var(--border);
+    vertical-align:top;
+  }
+  .route-table tr:last-child td{border-bottom:none;}
+  @media (max-width:520px){
+    .route-table th, .route-table td{font-size:12.5px;padding:6px;}
+  }
+  .status-dot{
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    display:inline-block;
+    margin-right:8px;
+    vertical-align:middle;
+    flex-shrink:0;
+  }
+  .status-dot.confirmed{background:var(--status-green);}
+  .status-dot.inmotion{background:var(--status-yellow);}
+  .status-dot.undecided{background:var(--status-red);}
+  .status-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .cal-cell.wedding-day{
+    border-width:3px;
+    border-color:var(--wedding);
+    box-shadow:0 0 0 2px var(--wedding-bg) inset;
+  }
+  .wedding-tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    color:var(--wedding);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  .wedding-badge{
+    display:inline-block;
+    font-size:13px;
+    font-weight:700;
+    color:var(--wedding);
+    background:var(--wedding-bg);
+    padding:3px 10px;
+    border-radius:999px;
+    margin-left:8px;
+  }
+  .wedding-card{
+    background:var(--wedding-bg);
+    border:2px solid var(--wedding);
+    border-radius:14px;
+    padding:20px 24px;
+    margin-bottom:14px;
+  }
+  .wedding-card h3{
+    font-size:20px;
+    margin:0 0 6px;
+    color:var(--text);
+  }
+  .wedding-card p{
+    margin:4px 0;
+    font-size:17px;
+  }
+  .checklist{
+    list-style:none;
+    padding:0;
+    margin:0;
+  }
+  .checklist li{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:12px 0;
+    border-bottom:1px solid var(--border);
+    font-size:17px;
+    line-height:1.5;
+  }
+  .checklist li:last-child{border-bottom:none;}
+  .checklist .status-dot{margin-top:6px;}
+  .cost-compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:16px;
+  }
+  .cost-card{
+    background:var(--card-bg);
+    border:2px solid var(--border);
+    border-radius:14px;
+    padding:16px 18px;
+  }
+  .cost-card h4{
+    margin:0 0 6px;
+    font-size:17px;
+  }
+  .cost-card p{
+    margin:4px 0;
+    font-size:15px;
+    color:var(--muted);
+  }
+  .city-block{margin-bottom:30px;}
+  .day-heading{
+    background:var(--bg);
+    border-left:4px solid var(--accent);
+    padding:7px 14px;
+    margin:18px 0 10px;
+    font-weight:700;
+    font-size:15px;
+    border-radius:0 8px 8px 0;
+  }
+  .day-heading .pick-note{
+    font-weight:400;
+    font-size:13px;
+    color:var(--muted);
+    display:block;
+    margin-top:2px;
+  }
+  .city-name{
+    font-size:22px;
+    font-weight:700;
+    margin:0 0 2px;
+  }
+  .city-days{
+    font-size:14px;
+    color:var(--muted);
+    margin:0 0 14px;
+  }
+  .activity-group-title{
+    font-size:13px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--muted);
+    margin:16px 0 8px;
+  }
+  .activity-item{
+    background:var(--card-bg);
+    border:2px solid var(--border);
+    border-radius:12px;
+    padding:12px 16px;
+    margin-bottom:10px;
+  }
+  .activity-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .activity-name{
+    font-size:17px;
+    font-weight:600;
+  }
+  .activity-desc{
+    font-size:15px;
+    color:var(--text);
+    margin:6px 0 0;
+    line-height:1.5;
+  }
+  .height-note{
+    font-size:13px;
+    color:var(--accent);
+    margin:4px 0 0;
+    display:block;
+  }
+  .meter-badge{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .meter-low{background:var(--pto-bg);color:var(--pto);}
+  .meter-moderate{background:var(--weekend-bg);color:var(--weekend);}
+  .meter-high{background:#FFF4E9;color:var(--accent);}
+  .meter-vhigh{background:#FBE7E7;color:#B23A3A;}
+  .tz-card{
+    background:var(--card-bg);
+    border:2px solid var(--border);
+    border-radius:14px;
+    padding:16px 20px;
+    margin-top:16px;
+  }
+  .tz-card h4{
+    margin:0 0 4px;
+    font-size:17px;
+  }
+  .tz-card .tz-sub{
+    font-size:14px;
+    color:var(--muted);
+    margin:0 0 10px;
+  }
+  .tz-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  .tz-table th{
+    text-align:left;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    color:var(--muted);
+    padding:6px 8px;
+    border-bottom:2px solid var(--border);
+  }
+  .tz-table td{
+    padding:6px 8px;
+    font-size:15.5px;
+    border-bottom:1px solid var(--border);
+  }
+  .tz-table tr:last-child td{border-bottom:none;}
+  .tz-table tr.tz-work td{background:var(--pto-bg);}
+  @media (max-width:480px){
+    .tz-table th, .tz-table td{font-size:13px;padding:5px 6px;}
+  }
+  @media (max-width:520px){
+    .cost-compare{grid-template-columns:1fr;}
+  }
+  section{margin-bottom:32px;}
+  h2.section-title{
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 16px;
+    border-bottom:3px solid var(--border);
+    padding-bottom:8px;
+  }
+  .flight-card{
+    background:var(--card-bg);
+    border:2px dashed var(--border);
+    border-radius:14px;
+    padding:18px 22px;
+    margin-bottom:14px;
+  }
+  .flight-card .flight-title{
+    font-weight:600;
+    font-size:18px;
+    margin:0 0 6px;
+  }
+  .flight-card .placeholder{
+    color:var(--muted);
+    font-size:17px;
+  }
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:15px;
+    margin-top:20px;
+  }
+  .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+  }
+  .cal-day-name{
+    font-size:14px;
+    font-weight:600;
+    text-align:center;
+    color:var(--muted);
+    padding-bottom:2px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .cal-cell{
+    border-radius:10px;
+    padding:8px 6px;
+    min-height:78px;
+    border:2px solid var(--border);
+    background:var(--card-bg);
+  }
+  .cal-cell.empty{
+    background:transparent;
+    border:none;
+  }
+  .cal-cell.normal{
+    background:#F4F1E9;
+  }
+  .cal-cell.pto{
+    background:var(--pto-bg);
+    border-color:var(--pto);
+  }
+  .cal-cell.weekend{
+    background:var(--weekend-bg);
+    border-color:var(--weekend);
+  }
+  .cal-num{
+    font-weight:700;
+    font-size:16px;
+    display:block;
+    margin-bottom:3px;
+  }
+  .cal-label{
+    font-size:12px;
+    line-height:1.3;
+    color:var(--text);
+  }
+  @media (max-width:600px){
+    .cal-cell{min-height:60px;padding:6px 4px;}
+    .cal-label{font-size:10.5px;}
+    .cal-num{font-size:14px;}
+  }
+  .tab-nav{
+    display:flex;
+    gap:8px;
+    margin-bottom:28px;
+    border-bottom:3px solid var(--border);
+  }
+  .tab-btn{
+    background:none;
+    border:none;
+    font-family:inherit;
+    font-size:18px;
+    font-weight:600;
+    padding:12px 18px;
+    color:var(--muted);
+    cursor:pointer;
+    border-bottom:4px solid transparent;
+    margin-bottom:-3px;
+    border-radius:8px 8px 0 0;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--text);border-bottom-color:var(--accent);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .logistics-card{
+    background:var(--card-bg);
+    border:2px solid var(--border);
+    border-radius:14px;
+    padding:18px 22px;
+    margin-bottom:14px;
+  }
+  .leg-title{
+    font-size:20px;
+    font-weight:700;
+    margin:0 0 6px;
+  }
+  .mode-badge{
+    display:inline-block;
+    font-size:14px;
+    font-weight:600;
+    padding:4px 12px;
+    border-radius:999px;
+    margin-bottom:8px;
+  }
+  .mode-badge.train{background:var(--pto-bg);color:var(--pto);}
+  .mode-badge.ferry{background:var(--weekend-bg);color:var(--weekend);}
+  .mode-badge.transfer{background:#FFF4E9;color:var(--accent);}
+  .leg-detail{
+    font-size:17px;
+    margin:0;
+    line-height:1.55;
+  }
+  .duration{
+    font-size:15px;
+    color:var(--muted);
+    font-weight:600;
+    margin-left:8px;
+  }
+  .stay-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:8px;
+  }
+  .stay-card{
+    background:var(--card-bg);
+    border:2px solid var(--border);
+    border-radius:14px;
+    padding:16px 18px;
+  }
+  .stay-city{
+    font-size:19px;
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  .stay-dates{
+    font-size:15px;
+    color:var(--muted);
+    margin:0 0 10px;
+  }
+  .stay-nights{
+    display:inline-block;
+    font-size:14px;
+    font-weight:600;
+    padding:4px 12px;
+    border-radius:999px;
+    background:var(--pto-bg);
+    color:var(--pto);
+  }
+  .stay-nights.unknown{
+    background:#FFF4E9;
+    color:var(--accent);
+  }
+  @media (max-width:520px){
+    .stay-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>My September Trip — Days Off Planner</h1>
+  <p class="subtitle">Sep 5 (depart SFO) – Sep 24 (recovery day home), 2026</p>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" id="btn-overview" onclick="showTab('overview')">Trip Overview</button>
+    <button class="tab-btn" id="btn-logistics" onclick="showTab('logistics')">Travel Logistics</button>
+    <button class="tab-btn" id="btn-activities" onclick="showTab('activities')">Activities</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-overview">
+
+  <div class="legend" style="margin-bottom:24px;">
+    <div class="legend-item"><span class="status-dot confirmed"></span> Confirmed</div>
+    <div class="legend-item"><span class="status-dot inmotion"></span> Still in motion</div>
+    <div class="legend-item"><span class="status-dot undecided"></span> Undecided</div>
+  </div>
+
+  <div class="summary">
+    <h2>Quick Summary</h2>
+    <div class="summary-grid">
+      <div class="stat">
+        <span class="num">8</span>
+        <span class="label">PTO days to take (Sep 14–17, 21–24)</span>
+      </div>
+      <div class="stat" style="background:var(--remote-bg);">
+        <span class="num" style="color:var(--remote);">5</span>
+        <span class="label">working days, not PTO (Sep 8–11, 18)</span>
+      </div>
+      <div class="stat" style="background:var(--holiday-bg);">
+        <span class="num" style="color:var(--holiday);">1</span>
+        <span class="label">paid holiday, free (Sep 7, Labor Day)</span>
+      </div>
+      <div class="stat">
+        <span class="num">5</span>
+        <span class="label">weekend days (no PTO needed)</span>
+      </div>
+      <div class="stat">
+        <span class="num">96.3 hrs</span>
+        <span class="label">PTO available (~12 days)</span>
+      </div>
+      <div class="stat">
+        <span class="num">~4 days</span>
+        <span class="label">PTO left over as buffer (32.3 hrs)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Note:</strong> Flights are booked — depart SFO Sep 5, arrive Paris Sep 6; return departs Milan (MXP) Sep 23 at 6:45 AM, landing SFO 12:50 PM PDT same day. Sep 7 is Labor Day — a paid company holiday, not PTO, free regardless of travel. Sep 8–11 (Nice, Monaco, Portofino) and Sep 18 (Amalfi → Milan/Como travel day) are "working" days, not PTO — per your manager, you just need to be available for customer/team calls, not blocked into fixed work hours. Sep 14–17 (Rome, Amalfi) and Sep 21–24 (Lake Como, wedding week, flight home, plus a recovery day back in El Dorado Hills) are full PTO — 8 days total, leaving about 4 days of buffer. Sep 23 is colored as PTO since that's what's being submitted, even though it's also your travel day home. Dina &amp; Jeremie's wedding on Sunday, Sep 20 in Lake Como is confirmed — it explains why the trip is anchored at Lake Como Sep 18–23 (their villa stay dates). It falls on a weekend, so it doesn't touch the PTO count either way. Exact hotel/villa arrangements for Sep 19–22 still aren't finalized.
+  </div>
+
+  <section>
+    <h2 class="section-title">September 2026 — Full Month View</h2>
+    <div class="legend">
+      <div class="legend-item"><span class="dot pto"></span> Take PTO</div>
+      <div class="legend-item"><span class="dot weekend"></span> Weekend — no PTO needed</div>
+      <div class="legend-item"><span class="dot remote"></span> Working (not PTO)</div>
+      <div class="legend-item"><span class="dot holiday"></span> Paid holiday</div>
+      <div class="legend-item"><span class="dot travel"></span> Travel day</div>
+      <div class="legend-item"><span class="dot" style="background:var(--wedding);"></span> Wedding day</div>
+      <div class="legend-item"><span class="dot" style="background:#F4F1E9;border:2px solid var(--border);"></span> Not part of trip</div>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-day-name">Sun</div>
+      <div class="cal-day-name">Mon</div>
+      <div class="cal-day-name">Tue</div>
+      <div class="cal-day-name">Wed</div>
+      <div class="cal-day-name">Thu</div>
+      <div class="cal-day-name">Fri</div>
+      <div class="cal-day-name">Sat</div>
+
+      <div class="cal-cell empty"></div>
+      <div class="cal-cell empty"></div>
+      <div class="cal-cell normal"><span class="cal-num">1</span></div>
+      <div class="cal-cell normal"><span class="cal-num">2</span></div>
+      <div class="cal-cell normal"><span class="cal-num">3</span></div>
+      <div class="cal-cell normal"><span class="cal-num">4</span></div>
+      <div class="cal-cell travel"><span class="cal-num">5</span><span class="cal-label">Depart SFO</span></div>
+
+      <div class="cal-cell weekend"><span class="cal-num">6</span><span class="cal-label">Arrive Paris</span></div>
+      <div class="cal-cell holiday"><span class="cal-num">7</span><span class="cal-label">Labor Day — Paris</span></div>
+      <div class="cal-cell remote"><span class="cal-num">8</span><span class="cal-label">Paris → Nice</span></div>
+      <div class="cal-cell remote"><span class="cal-num">9</span><span class="cal-label">Nice / Monaco</span></div>
+      <div class="cal-cell remote"><span class="cal-num">10</span><span class="cal-label">Nice → Portofino</span></div>
+      <div class="cal-cell remote"><span class="cal-num">11</span><span class="cal-label">Portofino</span></div>
+      <div class="cal-cell weekend"><span class="cal-num">12</span><span class="cal-label">Portofino → Pisa</span></div>
+
+      <div class="cal-cell weekend"><span class="cal-num">13</span><span class="cal-label">Pisa → Rome</span></div>
+      <div class="cal-cell pto"><span class="cal-num">14</span><span class="cal-label">Rome</span></div>
+      <div class="cal-cell pto"><span class="cal-num">15</span><span class="cal-label">Rome → Amalfi</span></div>
+      <div class="cal-cell pto"><span class="cal-num">16</span><span class="cal-label">Amalfi</span></div>
+      <div class="cal-cell pto"><span class="cal-num">17</span><span class="cal-label">Amalfi</span></div>
+      <div class="cal-cell remote"><span class="cal-num">18</span><span class="cal-label">Amalfi → Milan/Como</span></div>
+      <div class="cal-cell weekend"><span class="cal-num">19</span><span class="cal-label">Milan/Como (TBD)</span></div>
+
+      <div class="cal-cell weekend wedding-day"><span class="cal-num">20</span><span class="cal-label wedding-tag">Wedding</span><span class="cal-label">Dina &amp; Jeremie</span></div>
+      <div class="cal-cell pto"><span class="cal-num">21</span><span class="cal-label">Milan/Como</span></div>
+      <div class="cal-cell pto"><span class="cal-num">22</span><span class="cal-label">Milan/Como</span></div>
+      <div class="cal-cell pto"><span class="cal-num">23</span><span class="cal-label">Fly home (Travel Day)</span></div>
+      <div class="cal-cell pto"><span class="cal-num">24</span><span class="cal-label">Recovery day — El Dorado Hills</span></div>
+      <div class="cal-cell normal"><span class="cal-num">25</span></div>
+      <div class="cal-cell normal"><span class="cal-num">26</span></div>
+
+      <div class="cal-cell normal"><span class="cal-num">27</span></div>
+      <div class="cal-cell normal"><span class="cal-num">28</span></div>
+      <div class="cal-cell normal"><span class="cal-num">29</span></div>
+      <div class="cal-cell normal"><span class="cal-num">30</span></div>
+      <div class="cal-cell empty"></div>
+      <div class="cal-cell empty"></div>
+      <div class="cal-cell empty"></div>
+    </div>
+
+    <div class="tz-card">
+      <h4>Pacific Time → Europe, quick reference</h4>
+      <p class="tz-sub">Europe is 9 hours ahead of Pacific for this whole trip (Paris, Nice, Portofino, Pisa, Rome, Amalfi, and Milan/Como are all the same time zone) — this doesn't change, no time shifts to track mid-trip. Note: California is on PDT (not PST) in September.</p>
+      <table class="tz-table">
+        <tr><th>Pacific (PDT)</th><th>Europe (CEST)</th></tr>
+        <tr><td>12:00 AM</td><td>9:00 AM</td></tr>
+        <tr><td>1:00 AM</td><td>10:00 AM</td></tr>
+        <tr><td>2:00 AM</td><td>11:00 AM</td></tr>
+        <tr><td>3:00 AM</td><td>12:00 PM (noon)</td></tr>
+        <tr><td>4:00 AM</td><td>1:00 PM</td></tr>
+        <tr><td>5:00 AM</td><td>2:00 PM</td></tr>
+        <tr><td>6:00 AM</td><td>3:00 PM</td></tr>
+        <tr class="tz-work"><td>7:00 AM</td><td>4:00 PM</td></tr>
+        <tr class="tz-work"><td>8:00 AM</td><td>5:00 PM</td></tr>
+        <tr class="tz-work"><td>9:00 AM</td><td>6:00 PM</td></tr>
+        <tr class="tz-work"><td>10:00 AM</td><td>7:00 PM</td></tr>
+        <tr class="tz-work"><td>11:00 AM</td><td>8:00 PM</td></tr>
+        <tr class="tz-work"><td>12:00 PM</td><td>9:00 PM</td></tr>
+        <tr class="tz-work"><td>1:00 PM</td><td>10:00 PM</td></tr>
+        <tr class="tz-work"><td>2:00 PM</td><td>11:00 PM</td></tr>
+        <tr class="tz-work"><td>3:00 PM</td><td>12:00 AM (midnight, +1 day)</td></tr>
+        <tr><td>4:00 PM</td><td>1:00 AM (+1 day)</td></tr>
+        <tr><td>5:00 PM</td><td>2:00 AM (+1 day)</td></tr>
+        <tr><td>6:00 PM</td><td>3:00 AM (+1 day)</td></tr>
+        <tr><td>7:00 PM</td><td>4:00 AM (+1 day)</td></tr>
+        <tr><td>8:00 PM</td><td>5:00 AM (+1 day)</td></tr>
+        <tr><td>9:00 PM</td><td>6:00 AM (+1 day)</td></tr>
+        <tr><td>10:00 PM</td><td>7:00 AM (+1 day)</td></tr>
+        <tr><td>11:00 PM</td><td>8:00 AM (+1 day)</td></tr>
+      </table>
+      <p class="tz-sub" style="margin:10px 0 0;">Shaded rows = your normal 7 AM–3 PM Pacific work window, in local Europe time.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Day by Day</h2>
+    <div class="legend">
+      <div class="legend-item"><span class="dot pto"></span> Take PTO</div>
+      <div class="legend-item"><span class="dot weekend"></span> Weekend — no PTO needed</div>
+      <div class="legend-item"><span class="dot remote"></span> Working (not PTO)</div>
+      <div class="legend-item"><span class="dot holiday"></span> Paid holiday</div>
+      <div class="legend-item"><span class="dot travel"></span> Travel day</div>
+    </div>
+
+    <div class="day-card travel">
+      <div class="date-block"><span class="day-num">Sep 5</span><span class="day-name">Sat</span></div>
+      <div class="day-info">
+        <p class="location">Depart SFO 8:10 PM — overnight flight to Paris</p>
+        <span class="status-badge travel">Travel day</span>
+      </div>
+    </div>
+
+    <div class="day-card weekend">
+      <div class="date-block"><span class="day-num">Sep 6</span><span class="day-name">Sun</span></div>
+      <div class="day-info">
+        <p class="location">Arrive in Paris</p>
+        <span class="status-badge weekend">Weekend — no PTO needed</span>
+      </div>
+    </div>
+
+    <div class="day-card holiday">
+      <div class="date-block"><span class="day-num">Sep 7</span><span class="day-name">Mon</span></div>
+      <div class="day-info">
+        <p class="location">Paris — full day (Labor Day)</p>
+        <span class="status-badge holiday">Paid holiday — free</span>
+      </div>
+    </div>
+
+    <div class="day-card remote">
+      <div class="date-block"><span class="day-num">Sep 8</span><span class="day-name">Tue</span></div>
+      <div class="day-info">
+        <p class="location">Paris → Nice — full sightseeing day, phone on you for calls</p>
+        <span class="status-badge remote">Working — not PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card remote">
+      <div class="date-block"><span class="day-num">Sep 9</span><span class="day-name">Wed</span></div>
+      <div class="day-info">
+        <p class="location">Nice (day trip to Monaco) — full sightseeing day, phone on you for calls</p>
+        <span class="status-badge remote">Working — not PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card remote">
+      <div class="date-block"><span class="day-num">Sep 10</span><span class="day-name">Thu</span></div>
+      <div class="day-info">
+        <p class="location">Nice → Portofino — full sightseeing day, phone on you for calls</p>
+        <span class="status-badge remote">Working — not PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card remote">
+      <div class="date-block"><span class="day-num">Sep 11</span><span class="day-name">Fri</span></div>
+      <div class="day-info">
+        <p class="location">Portofino — full sightseeing day, phone on you for calls</p>
+        <span class="status-badge remote">Working — not PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card weekend">
+      <div class="date-block"><span class="day-num">Sep 12</span><span class="day-name">Sat</span></div>
+      <div class="day-info">
+        <p class="location">Portofino → Pisa</p>
+        <span class="status-badge weekend">Weekend — no PTO needed</span>
+      </div>
+    </div>
+
+    <div class="day-card weekend">
+      <div class="date-block"><span class="day-num">Sep 13</span><span class="day-name">Sun</span></div>
+      <div class="day-info">
+        <p class="location">Pisa → Rome</p>
+        <span class="status-badge weekend">Weekend — no PTO needed</span>
+      </div>
+    </div>
+
+    <div class="day-card pto">
+      <div class="date-block"><span class="day-num">Sep 14</span><span class="day-name">Mon</span></div>
+      <div class="day-info">
+        <p class="location">Rome</p>
+        <span class="status-badge pto">Take PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card pto">
+      <div class="date-block"><span class="day-num">Sep 15</span><span class="day-name">Tue</span></div>
+      <div class="day-info">
+        <p class="location">Rome → Amalfi</p>
+        <span class="status-badge pto">Take PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card pto">
+      <div class="date-block"><span class="day-num">Sep 16</span><span class="day-name">Wed</span></div>
+      <div class="day-info">
+        <p class="location">Amalfi</p>
+        <span class="status-badge pto">Take PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card pto">
+      <div class="date-block"><span class="day-num">Sep 17</span><span class="day-name">Thu</span></div>
+      <div class="day-info">
+        <p class="location">Amalfi</p>
+        <span class="status-badge pto">Take PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card remote">
+      <div class="date-block"><span class="day-num">Sep 18</span><span class="day-name">Fri</span></div>
+      <div class="day-info">
+        <p class="location">Amalfi → Milan → Lake Como — travel day, phone on you for calls</p>
+        <span class="status-badge remote">Working — not PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card weekend">
+      <div class="date-block"><span class="day-num">Sep 19</span><span class="day-name">Sat</span></div>
+      <div class="day-info">
+        <p class="location">Milan / Lake Como (city TBD)</p>
+        <span class="status-badge weekend">Weekend — no PTO needed</span>
+      </div>
+    </div>
+
+    <div class="day-card weekend">
+      <div class="date-block"><span class="day-num">Sep 20</span><span class="day-name">Sun</span></div>
+      <div class="day-info">
+        <p class="location">Lake Como — Dina &amp; Jeremie's wedding, ceremony &amp; dinner<span class="wedding-badge">Wedding day</span></p>
+        <span class="status-badge weekend">Weekend — no PTO needed</span>
+      </div>
+    </div>
+
+    <div class="day-card pto">
+      <div class="date-block"><span class="day-num">Sep 21</span><span class="day-name">Mon</span></div>
+      <div class="day-info">
+        <p class="location">Milan / Lake Como (city TBD)</p>
+        <span class="status-badge pto">Take PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card pto">
+      <div class="date-block"><span class="day-num">Sep 22</span><span class="day-name">Tue</span></div>
+      <div class="day-info">
+        <p class="location">Milan / Lake Como (city TBD)</p>
+        <span class="status-badge pto">Take PTO</span>
+      </div>
+    </div>
+
+    <div class="day-card pto">
+      <div class="date-block"><span class="day-num">Sep 23</span><span class="day-name">Wed</span></div>
+      <div class="day-info">
+        <p class="location">Fly home: Milan → Paris → SFO, land 12:50 PM PDT — travel day, not working, avoiding jet lag before Thu/Fri</p>
+        <span class="status-badge pto">Take PTO (Travel Day)</span>
+      </div>
+    </div>
+
+    <div class="day-card pto">
+      <div class="date-block"><span class="day-num">Sep 24</span><span class="day-name">Thu</span></div>
+      <div class="day-info">
+        <p class="location">Recovery day — El Dorado Hills, CA (drive home from SFO, decompress before back to work Friday)</p>
+        <span class="status-badge pto">Take PTO</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Flight Info</h2>
+    <div class="flight-card">
+      <p class="status-row"><span class="status-dot confirmed"></span>Confirmed</p>
+      <p class="flight-title">Outbound — Sat, Sep 5</p>
+      <p class="leg-detail">SFO → CDG (Paris) · Flight AF 81 · Confirmation HPWPCK</p>
+      <p class="leg-detail">Depart 8:10 PM PDT · Arrive Sep 6, 3:50 PM GMT+2</p>
+    </div>
+    <div class="flight-card">
+      <p class="status-row"><span class="status-dot confirmed"></span>Confirmed</p>
+      <p class="flight-title">Return — Wed, Sep 23</p>
+      <p class="leg-detail">MXP (Milan) → CDG (Paris) · Flight AF 1131 · Confirmation HPWPCK · Terminal 1</p>
+      <p class="leg-detail">Depart 6:45 AM GMT+2 · Arrive 8:25 AM GMT+2</p>
+      <p class="leg-detail">Layover: 1 hr 55 min in Paris</p>
+      <p class="leg-detail">CDG (Paris) → SFO · Flight AF 84 · Confirmation HPWPCK</p>
+      <p class="leg-detail">Depart 10:20 AM GMT+2 · Arrive 12:50 PM PDT</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Wedding</h2>
+    <div class="wedding-card">
+      <p class="status-row"><span class="status-dot confirmed"></span>Confirmed</p>
+      <h3>Dina &amp; Jeremie</h3>
+      <p>Lake Como, Italy</p>
+      <p><strong>Sunday, September 20, 2026</strong> — ceremony and dinner to follow</p>
+      <p>Hosts staying at their lakeside villa Sep 18 – Sep 23</p>
+      <p>Dress code: Italian Garden Formal</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Connectivity Plan</h2>
+    <div class="note">
+      <strong>Approach:</strong> A European eSIM (data + hotspot) as the main connection, paired with free Wi-Fi Calling on the AT&amp;T line so your real number stays reachable for customer and team calls — cheaper and more flexible than relying on AT&amp;T's Day Pass alone.
+    </div>
+
+    <div class="cost-compare">
+      <div class="cost-card">
+        <h4>AT&amp;T International Day Pass</h4>
+        <p>$12/day per line, only charged on days you use the phone. Capped at 10 days ($120) per billing cycle — but the cap resets if the trip spans two billing cycles, so it could hit $120 twice. Keeps your number active with no new setup.</p>
+      </div>
+      <div class="cost-card">
+        <h4>Airalo Eurolink Unlimited eSIM</h4>
+        <p>~$35 per 10 days · 3GB/day at full speed, then throttled (not cut off) — plenty for calls and normal use. Two stacked passes cover the whole trip for roughly $70 total, well under the AT&amp;T cap either way.</p>
+      </div>
+    </div>
+
+    <p class="status-row" style="margin-top:4px;"><span class="status-dot undecided"></span>Setup not started yet</p>
+
+    <ul class="checklist">
+      <li><span class="status-dot undecided"></span>Buy the Airalo Eurolink Unlimited eSIM — size it to cover Sep 6–23 (two 10-day passes, ~$70 total)</li>
+      <li><span class="status-dot undecided"></span>Turn on Wi-Fi Calling on the AT&amp;T line before leaving the US (Settings → Cellular → Wi-Fi Calling)</li>
+      <li><span class="status-dot undecided"></span>Install the eSIM profile at home over Wi-Fi — don't activate/start the clock until landing in France</li>
+      <li><span class="status-dot undecided"></span>Test it at home: Airplane Mode + Wi-Fi only, confirm a call/text still goes through over Wi-Fi Calling</li>
+      <li><span class="status-dot undecided"></span>Turn AT&amp;T cellular data/roaming OFF before departure so the Day Pass doesn't quietly trigger on top of the eSIM</li>
+      <li><span class="status-dot undecided"></span>Decide if your partner needs her own eSIM (recommended if you'll split up during the day) and buy it</li>
+      <li><span class="status-dot undecided"></span>Check your AT&amp;T billing cycle date — only matters if Day Pass ends up as backup, since the trip may span two cycles</li>
+      <li><span class="status-dot undecided"></span>On landing in Paris: activate the eSIM data plan, confirm Wi-Fi Calling shows "connected," test one real call or text</li>
+    </ul>
+  </section>
+
+  </div>
+
+  <div class="tab-panel" id="tab-logistics">
+
+  <div class="legend" style="margin-bottom:24px;">
+    <div class="legend-item"><span class="status-dot confirmed"></span> Confirmed</div>
+    <div class="legend-item"><span class="status-dot inmotion"></span> Still in motion</div>
+    <div class="legend-item"><span class="status-dot undecided"></span> Undecided</div>
+  </div>
+
+  <div class="note">
+    <strong>Approach:</strong> Trains for every leg where possible. Buses are avoided — on the two legs with no train service straight to the destination, a ferry is used instead.
+  </div>
+
+  <section>
+    <h2 class="section-title">Time in Each City</h2>
+    <div class="note" style="margin-bottom:16px;">Hotels aren't booked yet for any city, so every stay below is marked "still in motion" — nights per city could shift once bookings are locked in.</div>
+    <div class="stay-grid">
+      <div class="stay-card">
+        <p class="status-row"><span class="status-dot inmotion"></span>In motion</p>
+        <p class="stay-city">Paris</p>
+        <p class="stay-dates">Sep 6 (Sun) – Sep 8 (Tue)</p>
+        <span class="stay-nights">2 nights</span>
+      </div>
+      <div class="stay-card">
+        <p class="status-row"><span class="status-dot inmotion"></span>In motion</p>
+        <p class="stay-city">Nice</p>
+        <p class="stay-dates">Sep 8 (Tue) – Sep 10 (Thu)</p>
+        <span class="stay-nights">2 nights</span>
+      </div>
+      <div class="stay-card">
+        <p class="status-row"><span class="status-dot inmotion"></span>In motion</p>
+        <p class="stay-city">Portofino</p>
+        <p class="stay-dates">Sep 10 (Thu) – Sep 12 (Sat)</p>
+        <span class="stay-nights">2 nights</span>
+      </div>
+      <div class="stay-card">
+        <p class="status-row"><span class="status-dot inmotion"></span>In motion</p>
+        <p class="stay-city">Pisa</p>
+        <p class="stay-dates">Sep 12 (Sat) – Sep 13 (Sun)</p>
+        <span class="stay-nights">1 night</span>
+      </div>
+      <div class="stay-card">
+        <p class="status-row"><span class="status-dot inmotion"></span>In motion</p>
+        <p class="stay-city">Rome</p>
+        <p class="stay-dates">Sep 13 (Sun) – Sep 15 (Tue)</p>
+        <span class="stay-nights">2 nights</span>
+      </div>
+      <div class="stay-card">
+        <p class="status-row"><span class="status-dot inmotion"></span>In motion</p>
+        <p class="stay-city">Amalfi</p>
+        <p class="stay-dates">Sep 15 (Tue) – Sep 18 (Fri)</p>
+        <span class="stay-nights">3 nights</span>
+      </div>
+      <div class="stay-card">
+        <p class="status-row"><span class="status-dot inmotion"></span>In motion</p>
+        <p class="stay-city">Milan / Lake Como <span class="wedding-badge">Wedding Sep 20</span></p>
+        <p class="stay-dates">Sep 18 (Fri) – Sep 23 (Wed, fly home)</p>
+        <span class="stay-nights unknown">5 nights — anchored by the wedding villa stay; our own hotel/split between Milan &amp; Como still TBD</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">City to City</h2>
+
+    <table class="route-table">
+      <tr><th>Leg</th><th>Mode</th><th>Duration</th><th>Safety Tip</th></tr>
+      <tr>
+        <td>Paris → Nice</td>
+        <td>Train</td>
+        <td>~5.5–6 hrs</td>
+        <td>Reserve seats ahead; keep bags with you, not overhead</td>
+      </tr>
+      <tr>
+        <td>Nice → Portofino</td>
+        <td>Train + Ferry</td>
+        <td>~4–4.5 hrs</td>
+        <td>Watch bags closely at Ventimiglia/Genova stations; only take the ferry in good weather</td>
+      </tr>
+      <tr>
+        <td>Portofino → Pisa</td>
+        <td>Train</td>
+        <td>~2.5–3 hrs</td>
+        <td>Low-risk regional train; just keep tickets validated if required</td>
+      </tr>
+      <tr>
+        <td>Pisa → Rome</td>
+        <td>Train</td>
+        <td>~3 hrs</td>
+        <td>Easy leg, no real risk</td>
+      </tr>
+      <tr>
+        <td>Rome → Amalfi</td>
+        <td>Train + Ferry</td>
+        <td>~3.5–4 hrs</td>
+        <td>Rome Termini is a known pickpocket spot — use a crossbody bag; confirm the ferry is running (seasonal, Apr–Oct)</td>
+      </tr>
+      <tr>
+        <td>Amalfi → Milan/Como</td>
+        <td>Ferry + Train</td>
+        <td>~5–5.5 hrs</td>
+        <td>Long day — keep passports and valuables on you, not in checked bags</td>
+      </tr>
+    </table>
+
+    <div class="logistics-card">
+      <p class="leg-title">Paris → Nice <span class="duration">~5.5–6 hrs</span></p>
+      <span class="mode-badge train">Train</span>
+      <p class="leg-detail">Direct TGV from Gare de Lyon to Nice Ville. One train, no changes.</p>
+      <p class="safety-tip"><span class="safety-icon">&#9888;</span>Reserve seats ahead; keep bags with you, not overhead.</p>
+    </div>
+
+    <div class="logistics-card">
+      <p class="leg-title">Nice → Portofino <span class="duration">~4–4.5 hrs</span></p>
+      <span class="mode-badge train">Train</span>
+      <span class="mode-badge ferry">Ferry</span>
+      <p class="leg-detail">No train reaches Portofino directly. Train from Nice to Genova (usually a change at Ventimiglia), then a regional train to Santa Margherita Ligure–Portofino station. From there, skip the local bus and take the short ferry (Golfo Paradiso line) into Portofino — more scenic and avoids the bus.</p>
+      <p class="safety-tip"><span class="safety-icon">&#9888;</span>Watch bags closely at Ventimiglia/Genova stations; only take the ferry in good weather.</p>
+    </div>
+
+    <div class="logistics-card">
+      <p class="leg-title">Portofino → Pisa <span class="duration">~2.5–3 hrs</span></p>
+      <span class="mode-badge train">Train</span>
+      <p class="leg-detail">Regional/intercity train from Santa Margherita Ligure down the coast to Pisa Centrale, typically one change around La Spezia.</p>
+      <p class="safety-tip"><span class="safety-icon">&#9888;</span>Low-risk regional train; just keep tickets validated if required.</p>
+    </div>
+
+    <div class="logistics-card">
+      <p class="leg-title">Pisa → Rome <span class="duration">~3 hrs</span></p>
+      <span class="mode-badge train">Train</span>
+      <p class="leg-detail">Direct high-speed train (Frecciabianca/Frecciargento). Straightforward, no changes.</p>
+      <p class="safety-tip"><span class="safety-icon">&#9888;</span>Easy leg, no real risk.</p>
+    </div>
+
+    <div class="logistics-card">
+      <p class="leg-title">Rome → Amalfi <span class="duration">~3.5–4 hrs total</span></p>
+      <span class="mode-badge train">Train</span>
+      <span class="mode-badge ferry">Ferry</span>
+      <p class="leg-detail">High-speed Frecciarossa from Rome to Salerno (~2.5–2.75 hrs), then a ferry from Salerno to Amalfi (~35–70 min). The ferry runs roughly April–October and is faster and far more comfortable than the winding SITA coastal bus. Outside ferry season, a private car transfer is the better fallback over the public bus.</p>
+      <p class="safety-tip"><span class="safety-icon">&#9888;</span>Rome Termini is a known pickpocket spot — use a crossbody bag; confirm the ferry is running before counting on it.</p>
+    </div>
+
+    <div class="logistics-card">
+      <p class="leg-title">Amalfi → Milan / Lake Como <span class="duration">~5–5.5 hrs total</span></p>
+      <span class="mode-badge ferry">Ferry</span>
+      <span class="mode-badge train">Train</span>
+      <p class="leg-detail">Ferry or transfer back to Salerno or Naples, then a direct Frecciarossa high-speed train to Milano Centrale (~4–4.5 hrs from Naples). From Milan, a short regional train to Como (~35–40 min).</p>
+      <p class="safety-tip"><span class="safety-icon">&#9888;</span>Long travel day — keep passports and valuables on you, not in checked bags.</p>
+    </div>
+
+    <div class="logistics-card" style="border-color:var(--accent);border-style:dashed;">
+      <p class="leg-title">General Safety — Whole Trip</p>
+      <ul class="checklist">
+        <li><span class="status-dot confirmed"></span>Split cash/cards between you two — don't carry everything in one bag</li>
+        <li><span class="status-dot confirmed"></span>Use a crossbody or zip-close bag in crowded spots (train stations, Rome, Nice's old town)</li>
+        <li><span class="status-dot confirmed"></span>Stick to official taxi ranks or rideshare apps — skip unlicensed drivers</li>
+        <li><span class="status-dot confirmed"></span>Keep digital + physical copies of passports and reservations</li>
+        <li><span class="status-dot confirmed"></span>Keep your phone/data connection on so you can reach each other if you split up</li>
+      </ul>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="tab-panel" id="tab-activities">
+
+  <div class="note">
+    <strong>How to read this:</strong> Everything below is grouped by the exact day and town it fits — Nice and Monaco are now separate blocks since Monaco is its own day trip (Sep 9). Tourist meter = how packed with tourists a spot typically is (Low → Very High). Anything with real height exposure (climbs, cliff-edge trails) is flagged. Where a day has two options, pick one.
+  </div>
+
+  <div class="city-block">
+    <p class="city-name">Paris</p>
+    <p class="city-days">Sep 6–8</p>
+
+    <p class="day-heading">Sep 6 (Sun) — arrival evening, Paris</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Seine river boat cruise</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">A relaxed way to see the city without walking it all — easy after landing.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Canal Saint-Martin</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Trendy, local canal-side cafes — a low-key first evening.</p>
+    </div>
+
+    <p class="day-heading">Sep 7 (Mon) — full day, Paris</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Eiffel Tower at sunset</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">View from Trocadéro or the 2nd floor rather than the summit.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">The Louvre</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">Go early, pre-book, focus on 2–3 wings rather than trying to see everything.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Montmartre &amp; Sacré-Cœur</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">Cobblestone streets, artist square, easy hill walk up.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Notre-Dame &amp; Île de la Cité</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">Exterior plus a wander through the reopened cathedral grounds.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Musée de l'Orangerie</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Monet's Water Lilies in a small, calm museum — swap in if the Louvre feels like too much.</p>
+    </div>
+
+    <p class="day-heading">Sep 8 (Tue) — morning, Paris, before the train to Nice</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Rue Crémieux</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">A quiet, colorful residential street — great for photos, almost no crowds, quick stop.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Promenade Plantée</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Elevated green walkway above the streets — a calm short walk before heading to Gare de Lyon.</p>
+    </div>
+  </div>
+
+  <div class="city-block">
+    <p class="city-name">Nice</p>
+    <p class="city-days">Sep 8 (arrive) &amp; Sep 10 (before Portofino)</p>
+
+    <p class="day-heading">Sep 8 (Tue) — afternoon/evening, Nice</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Promenade des Anglais</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Classic beachfront walk — easy after arriving off the train.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Vieux Nice &amp; Cours Saleya market</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">Old town, flower and food market, great for wandering and dinner.</p>
+    </div>
+
+    <p class="day-heading">Sep 10 (Thu) — morning, Nice, before Portofino</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Colline du Château</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Easy hill path (not exposed) up to a panoramic view over Nice's bay.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Russian Orthodox Cathedral</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Unique onion-dome architecture, rarely crowded, a quick stop.</p>
+    </div>
+
+    <p class="day-heading">Anytime you're in Nice — off the beaten path<span class="pick-note">Not tied to a specific day</span></p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Villefranche-sur-Mer</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Small coastal town minutes from Nice, gorgeous bay, far fewer tourists.</p>
+    </div>
+  </div>
+
+  <div class="city-block">
+    <p class="city-name">Monaco <span class="wedding-badge" style="color:var(--weekend);background:var(--weekend-bg);">Day Trip</span></p>
+    <p class="city-days">Sep 9 (Wed) — full day trip from Nice</p>
+
+    <p class="day-heading">Sep 9 (Wed) — full day, Monaco</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Prince's Palace &amp; changing of the guard</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">Free to view from outside, worth timing around the guard change.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Monte Carlo Casino</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">Worth seeing even just the lobby and exterior.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Oceanographic Museum</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Genuinely excellent aquarium, founded by Jacques Cousteau.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Jardin Exotique</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Cliffside cactus garden with sweeping views — quieter than the casino district.</p>
+    </div>
+  </div>
+
+  <div class="city-block">
+    <p class="city-name">Portofino</p>
+    <p class="city-days">Sep 10–12</p>
+
+    <p class="day-heading">Sep 10 (Thu) — evening, Portofino, after arriving from Nice</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">The harbor piazzetta</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">Sit at a café and watch the boats — the classic Portofino moment, perfect first evening.</p>
+    </div>
+
+    <p class="day-heading">Sep 11 (Fri) — full day, Portofino</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Castello Brown</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Short, easy paved walk up (not a real hike) to a small castle with the best harbor view.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">San Fruttuoso Abbey</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Go by boat rather than the longer coastal trail — secluded cove, ancient abbey.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Paraggi Beach</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Small, quiet cove beach between Portofino and Santa Margherita.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Santa Margherita Ligure</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">The town everyone passes through on the way to Portofino — more local, much less crowded.</p>
+    </div>
+  </div>
+
+  <div class="city-block">
+    <p class="city-name">Pisa</p>
+    <p class="city-days">Sep 12 (arrive) – Sep 13 (depart), half-day stop</p>
+
+    <p class="day-heading">Sep 12 (Sat) or Sep 13 (Sun) — whichever half falls on your stop, Pisa</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Piazza dei Miracoli &amp; Leaning Tower</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">The tower climb is an enclosed spiral staircase, not an exposed height experience, so worth considering.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Piazza dei Cavalieri</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">A second, much quieter square just a few minutes' walk from the tower.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">A walk along the Arno</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Away from the tower crowds, colorful riverside buildings.</p>
+    </div>
+  </div>
+
+  <div class="city-block">
+    <p class="city-name">Rome</p>
+    <p class="city-days">Sep 13–15</p>
+
+    <p class="day-heading">Sep 13 (Sun) — evening, Rome, after arriving from Pisa</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Trastevere</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Much more local feel — best for a first-night dinner and evening wander.</p>
+    </div>
+
+    <p class="day-heading">Sep 14 (Mon) — full day, Rome</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Colosseum, Roman Forum, Palatine Hill</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">Book skip-the-line, do it first thing in the morning.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Vatican Museums, Sistine Chapel, St. Peter's</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">The basilica interior is worth it on its own.</p>
+      <span class="height-note">The dome climb is a tight spiral stair with an exposed ledge near the top — skip it if you'd rather not.</span>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Trevi Fountain, Pantheon, Piazza Navona</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">Best done as one evening walking loop through the historic center to close out the day.</p>
+    </div>
+
+    <p class="day-heading">Sep 15 (Tue) — morning, Rome, before Amalfi</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Aventine Hill &amp; the "keyhole" view</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">The Orange Garden and the famous keyhole framing St. Peter's dome — a great view with almost no crowd, quick stop.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Testaccio</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Authentic food market and trattorias, where Romans actually eat — good breakfast stop before the train.</p>
+    </div>
+
+    <p class="day-heading">If you get extra time — off the beaten path<span class="pick-note">Needs more time than the schedule above allows</span></p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Via Appia Antica</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Ancient Roman road through quiet countryside, catacombs nearby.</p>
+    </div>
+  </div>
+
+  <div class="city-block">
+    <p class="city-name">Amalfi Coast</p>
+    <p class="city-days">Sep 15–18, based in Amalfi town</p>
+
+    <p class="day-heading">Sep 15 (Tue) — evening, Amalfi town, after arriving from Rome</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Amalfi town: Duomo &amp; lemon grove tasting</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">The cathedral plus a limoncello tasting in the terraced groves above town — easy first evening.</p>
+    </div>
+
+    <p class="day-heading">Sep 16 (Wed) — pick one, day trip<span class="pick-note">Positano is the boat-friendly, no-height option</span></p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Positano</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">Go by boat rather than driving — worth the crowds.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Path of the Gods hike</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">The famous cliffside trail — several hours with exposed drops in sections.</p>
+      <span class="height-note">Given the height preference, I'd skip the full route or just do a short in-and-out stretch rather than the whole thing.</span>
+    </div>
+
+    <p class="day-heading">Sep 17 (Thu) — pick one, day trip</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Ravello — Villa Rufolo &amp; Villa Cimbrone</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Hilltop town with famous gardens.</p>
+      <span class="height-note">Villa Cimbrone's "Terrace of Infinity" is a garden ledge right at a drop-off — not a climb, but worth knowing.</span>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Boat tour along the coast</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Amalfi–Positano–Capri by water — the best way to see the dramatic cliffs with zero hiking or height exposure.</p>
+    </div>
+
+    <p class="day-heading">Anytime you're in Amalfi — off the beaten path<span class="pick-note">Not tied to a specific day, easy to slot into 16th or 17th</span></p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Atrani</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Tiny village a 5-minute walk from Amalfi that almost nobody stops in.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Furore &amp; the Fjord</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">A dramatic narrow inlet with a small beach, viewable right from the bridge above.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Minori &amp; Maiori</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Real beach towns with a fraction of Positano's crowds.</p>
+    </div>
+  </div>
+
+  <div class="city-block">
+    <p class="city-name">Lake Como <span class="wedding-badge">Wedding Sep 20</span></p>
+    <p class="city-days">Sep 18–23</p>
+
+    <p class="day-heading">Sep 19 (Sat) — free day before the wedding, Lake Como</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Bellagio</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">The classic "pearl of the lake" — boutiques, lakefront cafes.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Varenna</span><span class="meter-badge meter-moderate">Moderate</span></div>
+      <p class="activity-desc">Quieter and, honestly, prettier than Bellagio.</p>
+    </div>
+
+    <p class="day-heading">Sep 20 (Sun) — WEDDING DAY, Lake Como<span class="pick-note">Dina &amp; Jeremie — ceremony &amp; dinner, no other activities planned</span></p>
+
+    <p class="day-heading">Sep 21 (Mon) — Lake Como</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Villa del Balbianello</span><span class="meter-badge meter-high">High</span></div>
+      <p class="activity-desc">Reachable by boat, famous gardens (filming location for Bond and Star Wars).</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Castello di Vezio, above Varenna</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Small castle with peacocks and a great view — short, paved walk up, not a real hike.</p>
+    </div>
+
+    <p class="day-heading">Sep 22 (Tue) — last full day, Milan/Lake Como</p>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Milan day trip: Duomo &amp; The Last Supper</span><span class="meter-badge meter-vhigh">Very High</span></div>
+      <p class="activity-desc">The Last Supper needs advance booking and often sells out weeks ahead — worth reserving now if wanted.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Lake ferry between towns</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Relaxing way to see Bellagio, Varenna, and Menaggio without driving — good alternative to the Milan trip.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Isola Comacina</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">The lake's only island — one small restaurant, boat access, very few visitors.</p>
+    </div>
+    <div class="activity-item">
+      <div class="activity-head"><span class="activity-name">Nesso</span><span class="meter-badge meter-low">Low</span></div>
+      <p class="activity-desc">Tiny village built around a small gorge and waterfall — rarely on the tourist circuit.</p>
+    </div>
+  </div>
+
+  </div>
+
+  <footer>Made for your September 2026 trip · Flights, wedding date &amp; PTO plan confirmed · Hotels still in motion</footer>
+
+</div>
+
+<script>
+  function showTab(name){
+    document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('btn-' + name).classList.add('active');
+  }
+</script>
+</body>
+</html>
